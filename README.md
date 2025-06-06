@@ -27,7 +27,7 @@ source .venv/bin/activate
 ```
 for Windows:
 ```bash
-.venv\Scripts\activate
+venv\Scripts\activate
 ```
 
 
@@ -36,27 +36,7 @@ Install the MurirTin server using the `uv` package manager:
 ```bash
 uv sync
 ```
-### 4. Initialize the Database
-1. Create .env file in the root directory with the following content:
-   ```
-    DB_URL=sqlite:///./data/murirtin.db
-   ```
-2. Install the pakage to use cli tools:
-    ```bash
-    uv pip install -e .
-    ```
-3. Initialize the database:
-    ```bash
-    uv run init-db
-    ```   
-### 5. Run  the Server
-Run the server using:
+### 4. Running Server with uvicorn:
 ```bash
-uv run start-server
-```
-
-### 6. To see Documentation
-Open your browser and navigate to:
-```
-http://localhost:8000/docs
+uvicorn src.main:app --reload --port 8000
 ```
