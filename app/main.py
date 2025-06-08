@@ -1,15 +1,13 @@
 from fastapi import FastAPI
 from typing import Dict
+from api.Auth.router import auth_router
+import uvicorn
 
 app : FastAPI = FastAPI()
-@app.get("/")
-async def read_root():
-    return {"message": "Hello, World!"}
+app.include_router(auth_router)
 
-@app.get('/greet/{name}')
-async def greet_name(name : str) -> Dict[str, str]:
-    return {"message": f"Hello, {name}!"}
+def main():
+    uvicorn.run('main:app',reload=True)
 
-@app.get('/greet1')
-async def greet1(name: str) -> Dict[str, str]:
-    return {"message": f"Hello, {name}!"}
+if __name__ == '__main__':
+    main()
