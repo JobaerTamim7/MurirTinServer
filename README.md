@@ -49,3 +49,14 @@ uv sync
     ```bash
     uv run init-db
     ```   
+### 5. Run  the Server
+Run the server using:
+```bash
+uv run start-server
+```
+
+### 6. To see Documentation
+Open your browser and navigate to:
+```
+http://localhost:8000/docs
+```
