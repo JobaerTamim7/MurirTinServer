@@ -3,6 +3,7 @@ from sqlalchemy import String, UniqueConstraint, PrimaryKeyConstraint, CheckCons
 from sqlalchemy.orm import Mapped, mapped_column
 from uuid import uuid4
 
+
 class User(Base):
     __tablename__ = "user"
 
@@ -16,5 +17,5 @@ class User(Base):
         PrimaryKeyConstraint('id',name='pk_user'),
         UniqueConstraint('email',name='uq_user_email'),
         UniqueConstraint('phone_no',name='uq_user_phone'),
-        CheckConstraint('lenght(phone_no) = 11', name='chk_user_phone_len')
+        CheckConstraint('length(phone_no) = 11', name='chk_user_phone_len')
     )
