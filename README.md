@@ -27,7 +27,7 @@ source .venv/bin/activate
 ```
 for Windows:
 ```bash
-venv\Scripts\activate
+.venv\Scripts\activate
 ```
 
 
