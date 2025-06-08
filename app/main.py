@@ -1,25 +1,15 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from api.Auth.router import auth_router
-import uvicorn
+from typing import Dict
 
 app : FastAPI = FastAPI()
-app.include_router(auth_router)
+@app.get("/")
+async def read_root():
+    return {"message": "Hello, World!"}
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@app.get('/greet/{name}')
+async def greet_name(name : str) -> Dict[str, str]:
+    return {"message": f"Hello, {name}!"}
 
-@app.get('/')
-def test():
-    return {"message":"Server is running at full throttle."}
-
-def main():
-    uvicorn.run('main:app',reload=True,port=8000)
-
-if __name__ == '__main__':
-    main()
+@app.get('/greet1')
+async def greet1(name: str) -> Dict[str, str]:
+    return {"message": f"Hello, {name}!"}
