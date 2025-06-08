@@ -38,7 +38,7 @@ uv sync
 ```
 ### 4. Initialize the Database
 1. Create .env file in the root directory with the following content:
-   ```env
+   ```
     DB_URL=sqlite:///./data/murirtin.db
    ```
 2. Install the pakage to use cli tools:
