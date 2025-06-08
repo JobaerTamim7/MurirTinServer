@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from models.User import User
 from fastapi import HTTPException
 from fastapi.responses import JSONResponse
+from utils.password import password_hashing
 
 def create_user(user: CreateUserRequest, db_session: Session):
     try:
@@ -11,7 +12,7 @@ def create_user(user: CreateUserRequest, db_session: Session):
             user_name = user.user_name,
             email = user.email,
             phone_no = user.phone_number,
-            hashed_password = user.password.get_secret_value()
+            hashed_password = password_hashing(user.password.get_secret_value())
         )
 
         db_session.add(new_user)
