@@ -6,6 +6,20 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "fastapi>=0.115.12",
+    "pydantic>=2.11.5",
+    "python-dotenv>=1.1.0",
     "sqlalchemy>=2.0.41",
+    "uuid>=1.30",
     "uvicorn>=0.34.3",
 ]
+
+[project.scripts]
+init-db="database.init_db:main"
+start-server="main:main"
+
+# to include a pakage : https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
+[tool.setuptools]
+package-dir = {"" = "app"} 
+
+[tool.setuptools.packages.find]
+where = ["app"]
