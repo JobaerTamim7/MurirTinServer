@@ -16,7 +16,7 @@ app.add_middleware(
 
 @app.get('/')
 def test():
-    return {"message" : "Server is running at full throttle."}
+    return {"message":"Server is running at full throttle."}
 
 def main():
     uvicorn.run('main:app',reload=True,port=8000)
