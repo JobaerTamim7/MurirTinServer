@@ -3,6 +3,7 @@ from schemas.UserSchema import CreateUserRequest,LoginUserRequest
 from services.Auth.login_validation import login_validation
 from services.Auth.register_user import register_user
 from sqlalchemy.orm import Session
+from models.User import User
 from database.database import get_session
 
 auth_router = APIRouter(prefix="/auth",tags=["auth"])
