@@ -5,15 +5,17 @@ from models.User import User
 from sqlalchemy.orm import Session
 from fastapi import HTTPException,status
 from fastapi.responses import JSONResponse
+from exceptions import UserNotFoundError, PasswordMismatchError
 
-def login_validation(req_user: LoginUserRequest, db_session: Session) -> JSONResponse:
+def login_validation(req_user: LoginUserRequest, db_session: Session) -> JSONResponse | None:
     try:
         user: User = get_user_by_mail(req_user.email, db_session)
         is_pass_verified: bool = verify_pass(req_user.password.get_secret_value(),user.hashed_password)
 
         if is_pass_verified == False:
-            raise HTTPException(status_code=401,detail="Wrong password.")
+            raise PasswordMismatchError()
         
+    
         user_info : UserInfo = UserInfo(
                 email=user.email,
                 user_name=user.user_name,
@@ -28,7 +30,13 @@ def login_validation(req_user: LoginUserRequest, db_session: Session) -> JSONRes
                 "user": user_info.model_dump()
             }
         )
-    except HTTPException:
-        raise
-    except Exception:
-        raise HTTPException(status_code=500, detail="Internal server error") 
+    except Exception as error:
+        handleError(error)
+
+def handleError(error: Exception):
+    if isinstance(error, UserNotFoundError):
+        raise HTTPException(status_code=404, detail="User is not registered.")
+    elif isinstance(error, PasswordMismatchError):
+        raise HTTPException(status_code=401, detail="Password is incorrect.")
+    else:
+        raise HTTPException(status_code=500, detail=f"Internal Server Error. {str(error)}")
