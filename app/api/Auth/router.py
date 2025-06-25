@@ -7,10 +7,13 @@ from database.database import get_session
 
 auth_router = APIRouter(prefix="/auth",tags=["auth"])
 
+@DeprecationWarning
 @auth_router.post("/register")
 async def register(user: CreateUserRequest, db_session: Session = Depends(get_session)):
     return register_user(user,db_session)
 
+@DeprecationWarning
 @auth_router.post("/login")
 async def login(req_user: LoginUserRequest, db_session: Session = Depends(get_session)):
     return login_validation(req_user,db_session)
+

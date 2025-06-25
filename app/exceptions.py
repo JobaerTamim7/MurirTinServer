@@ -5,3 +5,7 @@ class UserNotFoundError(Exception):
 class PasswordMismatchError(Exception):
     """Custom exception for password mismatch errors."""
     pass
+
+
+class BusStopNotFoundError(Exception):
+    pass
