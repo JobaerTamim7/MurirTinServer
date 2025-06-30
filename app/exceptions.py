@@ -9,3 +9,7 @@ class PasswordMismatchError(Exception):
 
 class BusStopNotFoundError(Exception):
     pass
+
+class RouteNotFoundError(Exception):
+    """Custom exception for route not found errors."""
+    pass

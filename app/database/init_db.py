@@ -1,7 +1,6 @@
 from .database import get_engine
 from sqlalchemy import Engine
 from models.Base import Base
-from models.User import User
 import os
 
 

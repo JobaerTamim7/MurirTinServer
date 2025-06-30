@@ -12,6 +12,7 @@ class BusStop(Base):
     latitude: Mapped[float] = mapped_column(Float, nullable=False)
     longitude: Mapped[float] = mapped_column(Float, nullable=False)
     route_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    order: Mapped[int] = mapped_column(Integer, nullable=False)
 
     __table_args__ = (
         PrimaryKeyConstraint('stop_id', name='pk_bus_stop'),
