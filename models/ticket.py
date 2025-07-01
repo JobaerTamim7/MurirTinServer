@@ -1,14 +1,24 @@
-from datetime import date
 from pydantic import BaseModel
 from typing import Optional
 
-class TicketCreate(BaseModel):
-    bus_id: int
-    route_id: int
-    travel_date: date
-    price: float
+class BookTicketRequest(BaseModel):
+    from_location: str
+    to_location: str
+    ticket_count: int
 
-class TicketResponse(TicketCreate):
-    ticket_id: int
-    user_id: str
-    booking_time: str
+class TicketBookingResponse(BaseModel):
+    message: str
+    ticket_count: int
+    total_cost: int
+    booking_id: str
+
+class BusRoute(BaseModel):
+    id: int
+    from_location: str
+    to_location: str
+    price: int
+    available_seats: int
+
+
+
+

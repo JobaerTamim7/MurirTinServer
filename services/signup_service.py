@@ -17,12 +17,15 @@ async def sign_up_user(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Auth registration failed"
             )
+
+        profile_pic_url = user_data.profile_pic_url if user_data.profile_pic_url else 'https://www.w3schools.com/w3images/avatar2.png'
         
         profile_data = {
             "id": auth_response.user.id,
             "username": user_data.username,
             "email": user_data.email,
-            "phone": user_data.phone
+            "phone": user_data.phone,
+            "profile_pic_url": profile_pic_url
         }
         response = supabase.table("user_profiles").insert(profile_data).execute()
         

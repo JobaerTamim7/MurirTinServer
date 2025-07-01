@@ -1,53 +1,65 @@
+from typing import List, Optional
 from fastapi import HTTPException, status
-from supabase import Client
+from datetime import datetime
 from database import supabase
-from models.complaint import Complaint, ComplaintCreate
-from utils.jwt_token import get_current_user
-from typing import List
-from fastapi import Depends
+from models.complaint import ComplaintCreate
+from models.company import Company
 
-async def create_complaint(
-    complaint: ComplaintCreate,
-    current_user: dict = Depends(get_current_user)
-):
+async def get_all_companies(current_user: dict) -> List[Company]:
+    """
+    Fetches all bus companies from the 'bus_company' table.
+    Requires a valid authenticated user.
+    """
+    user_id = current_user.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required to view companies."
+        )
+    
     try:
-        response = supabase.table("complaints").insert({
-            "user_id": current_user["sub"], 
-            "title": complaint.title,
-            "description": complaint.description
-        }).execute()
-        
-        complaint_data = response.data[0]
-        return {
-            "id": int(complaint_data["id"]),
-            "user_id": str(complaint_data["user_id"]),
-            "title": complaint_data["title"],
-            "description": complaint_data["description"],
-            "created_at": complaint_data["created_at"],
-            "username": "current_user"  
-        }
+        response = supabase.table('bus_company').select("id, name").execute()
+        if response.data:
+            companies = [Company(id=item['id'], name=item['name']) for item in response.data]
+            return companies
+        return []
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        print(f"Error fetching companies: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to fetch companies."
+        )
 
-async def get_complaints():
+async def create_complaint(complaint: ComplaintCreate, current_user: dict) -> Optional[dict]:
+    """
+    Inserts a new complaint into the 'complaint' table.
+    Requires a valid authenticated user.
+    """
+    user_id = current_user.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required to submit a complaint."
+        )
+    
     try:
-        response = supabase.table("complaints").select("""
-            id,
-            title,
-            description,
-            created_at,
-            user_id,
-            user_profiles:user_id(username)
-        """).order("created_at", desc=True).execute()
+        complaint_dict = complaint.model_dump()
+        complaint_dict['user_id'] = user_id
+        complaint_dict['created_at'] = datetime.now().isoformat()
+        complaint_dict['status'] = 'pending'  
 
-        return [{
-            "id": int(complaint["id"]), 
-            "title": complaint["title"],
-            "description": complaint["description"],
-            "created_at": complaint["created_at"],
-            "user_id": str(complaint["user_id"]), 
-            "username": complaint["user_profiles"]["username"]
-        } for complaint in response.data]
-        
+        response = supabase.table('complaints').insert(complaint_dict).execute()
+
+        if response.data:
+            return response.data[0]
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to insert complaint into database."
+            )
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        print(f"Error creating complaint: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred while submitting the complaint."
+        )

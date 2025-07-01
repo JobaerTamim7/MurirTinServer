@@ -1,6 +1,5 @@
-# main.py
 from fastapi import FastAPI, Depends
-from routers import auth, ticket, signup, profile, complaint
+from routers import auth, ticket, signup, profile, complaint,ticket, qr_code
 from utils.jwt_token import get_current_user
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,16 +13,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
 app.include_router(auth.router)
 app.include_router(signup.router)
 app.include_router(profile.router)
 app.include_router(complaint.router)
+app.include_router(ticket.router)
+app.include_router(qr_code.router)
 
 @app.get("/")
 async def root():
-    return {"message": "API is running gastly"}
+    return {"message": "API is running successfully!"}
 
-# @app.get("/protected/")
-# async def protected_route(current_user: dict = Depends(get_current_user)):
-#     return {"message": "This is a protected route", "user": current_user}

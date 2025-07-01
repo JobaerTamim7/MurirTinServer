@@ -22,5 +22,4 @@ async def login_for_access_token(credentials: UserLogin):
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials",
         )
