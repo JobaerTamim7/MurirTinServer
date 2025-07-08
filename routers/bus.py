@@ -22,6 +22,6 @@ async def all_routes():
 
 @bus_router.post("/nearest_stop", response_model=NearestBusStopResponse, status_code=status.HTTP_200_OK)
 async def nearest_bus_stop(body: NearestBusStopRequest):
-    response = get_nearest_bus_stop(longitude=body.longitude, latitude=body.latitude, route_id=body.route_id)
+    response = await get_nearest_bus_stop(longitude=body.longitude, latitude=body.latitude, route_id=body.route_id)
 
     return response
