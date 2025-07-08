@@ -6,6 +6,9 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi[standard]>=0.115.13",
+    "geopy>=2.4.1",
+    "postgrest>=1.0.2",
+    "pydantic-settings>=2.10.1",
     "python-dotenv>=1.1.0",
     "supabase>=2.15.3",
 ]
