@@ -6,8 +6,15 @@ from postgrest.base_request_builder import APIResponse
 import httpx
 from models.nearest_bus_stop import NearestBusStopResponse
 from geopy.distance import geodesic
+from fastapi import status
 
-def get_all_bus_stops_by_route_id(route_id: str):
+def get_all_bus_stops_by_route_id(route_id: str,current_user: dict):
+    user_id = current_user.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required to view companies."
+        )
     try:
         response : APIResponse = supabase\
             .table("bus_stops")\
@@ -34,7 +41,13 @@ def get_all_bus_stops_by_route_id(route_id: str):
             detail=f"An error occurred while fetching bus stops: {str(e)}"
         )
     
-def get_all_routes():
+def get_all_routes(current_user: dict):
+    user_id = current_user.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required to view companies."
+        )
     try:
         response : APIResponse = supabase\
             .table("bus_stops")\
@@ -55,9 +68,15 @@ def get_all_routes():
             detail=f"An error occurred while fetching routes: {str(e)}"
         )
     
-async def get_nearest_bus_stop(longitude: float, latitude: float, route_id: str):
+async def get_nearest_bus_stop(longitude: float, latitude: float, route_id: str, current_user: dict) -> NearestBusStopResponse:
+    user_id = current_user.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required to view companies."
+        )
     try:
-        bus_stops : List[BusStopResponse] = get_all_bus_stops_by_route_id(route_id)
+        bus_stops : List[BusStopResponse] = get_all_bus_stops_by_route_id(route_id, current_user)
 
         min_distance : float = float('inf')
         nearest_bus_stop : BusStopResponse = bus_stops[0]
