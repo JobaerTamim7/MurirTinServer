@@ -34,7 +34,7 @@ async def sign_up_user(
                 status_code=status.HTTP_400_BAD_REQUEST,
             )
             
-        return response.data[0]
+        return UserProfile(**response.data[0])
         
     except Exception as e:
         raise HTTPException(

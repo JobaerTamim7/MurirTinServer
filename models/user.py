@@ -17,7 +17,7 @@ class UserSignUp(BaseModel):
     password: str
     username: str 
     phone: str
-    profile_pic_url: str
+    profile_pic_url: Optional[str] = None
 
 class UserProfile(BaseModel):
     id: str
