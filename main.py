@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Depends
-from routers import auth, ticket, signup, profile, complaint,ticket, qr_code,issues, bus
+from routers import auth, ticket, signup, profile, complaint,ticket, qr_code,issues, bus, admin
 
 from utils.jwt_token import get_current_user
 
@@ -22,6 +22,7 @@ app.include_router(ticket.router)
 app.include_router(qr_code.router)
 app.include_router(issues.router)
 app.include_router(bus.bus_router)
+app.include_router(admin.router)
 
 @app.get("/")
 async def root():
