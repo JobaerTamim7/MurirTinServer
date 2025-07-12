@@ -40,7 +40,7 @@ async def book_tickets(
             rate = 5
 
             price = distance_km * rate
-            rounded_price = price // 5 + 5
+            rounded_price = (price // 5) * 5 + 5
 
         
 
