@@ -12,5 +12,6 @@ dependencies = [
     "python-dotenv>=1.1.0",
     "python-jose>=3.5.0",
     "redis>=6.2.0",
+    "requests>=2.32.4",
     "supabase>=2.15.3",
 ]

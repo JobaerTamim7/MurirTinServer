@@ -3,25 +3,21 @@ from database import supabase
 from models.ticket import BookTicketRequest, TicketBookingResponse
 from datetime import datetime
 from typing import Optional
+import requests
 
 async def book_tickets(
     request: BookTicketRequest,
     current_user: dict 
 ) -> TicketBookingResponse:
    
-    from_loc = request.from_location.strip()
-    to_loc = request.to_location.strip()
+    from_loc_position = (request.from_location_long, request.from_location_lat)
+    to_loc_position = (request.to_location_long, request.to_location_lat)
     ticket_count = request.ticket_count
     user_id = current_user.get("sub") 
 
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required for booking.")
 
-    
-    if not from_loc or not to_loc or ticket_count <= 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-        )
 
     if ticket_count > 4:
         raise HTTPException(
@@ -30,33 +26,31 @@ async def book_tickets(
 
     try:
 
-        route_response = supabase.table('bus_routes').select('price, id, available_seats').ilike('from_location', from_loc).ilike('to_location', to_loc).limit(1).execute()
+        mapbox_directions_url = f"https://api.mapbox.com/directions/v5/mapbox/driving/{from_loc_position[0]},{from_loc_position[1]};{to_loc_position[0]},{to_loc_position[1]}?alternatives=false&annotations=distance&geometries=geojson&language=en&overview=full&steps=true&access_token=pk.eyJ1IjoidGFtaW03IiwiYSI6ImNtYzByY243djA2Y2UybHIydTllaHhudjIifQ.6zTjpL0hMo0oQWBt8KNHOQ"
+        response = requests.get(mapbox_directions_url)
 
-        if not route_response.data:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bus route not found for the given locations.")
+        data = response.json()
 
-        route_data = route_response.data[0]
-        available_seats = route_data.get('available_seats')
-        price = route_data.get('price')
-        route_id = route_data.get('id')
 
-        if available_seats is None or price is None or route_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        rounded_price = 0
+
+        if response.status_code == 200 and "routes" in data and data["routes"]:
+            total_distance = data["routes"][0]["distance"]
+            distance_km = total_distance/1000
+            rate = 5
+
+            price = distance_km * rate
+            rounded_price = price // 5 + 5
 
         
-        if ticket_count > available_seats:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-            )
 
-        total_cost = ticket_count * price
+
+        total_cost = ticket_count * rounded_price
 
         booking_insert_data = {
-            'route_id': route_id,
-            'from_location': from_loc,
-            'to_location': to_loc,
+            'route_id': request.route_id,
+            'from_location': request.from_location,
+            'to_location': request.to_location,
             'ticket_count': ticket_count,
             'total_cost': total_cost,
             'booking_time': datetime.now().isoformat(),
@@ -69,12 +63,6 @@ async def book_tickets(
 
         booking_record = booking_response.data[0]
         booking_id = booking_record.get('id', 'N/A')
-
-        update_response = supabase.table('bus_routes').update({'available_seats': available_seats - ticket_count}).eq('id', route_id).execute()
-
-        if not update_response.data:
-            
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to update available seats after booking.")
 
         
         return TicketBookingResponse(
