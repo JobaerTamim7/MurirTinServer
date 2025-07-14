@@ -46,7 +46,7 @@ async def create_complaint(complaint: ComplaintCreate, current_user: dict) -> Op
         complaint_dict = complaint.model_dump()
         complaint_dict['user_id'] = user_id
         complaint_dict['created_at'] = datetime.now().isoformat()
-        complaint_dict['status'] = 'pending'  
+        complaint_dict['status'] = 'submitted'  
 
         response = supabase.table('complaints').insert(complaint_dict).execute()
 
