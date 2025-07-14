@@ -47,12 +47,16 @@ async def create_complaint(complaint: ComplaintCreate, current_user: dict) -> Op
         complaint_dict['user_id'] = user_id
         complaint_dict['created_at'] = datetime.now().isoformat()
         complaint_dict['status'] = 'submitted' 
-        complaint_dict['ticket_id'] = complaint.ticket_id 
+        if complaint_dict.get('ticket_id') is not None:
+            complaint_dict['ticket_id'] = str(complaint_dict['ticket_id'])
 
         response = supabase.table('complaints').insert(complaint_dict).execute()
 
         if response.data:
-            return response.data[0]
+            response_data = response.data[0]
+            if response_data.get('ticket_id') is not None:
+                response_data['ticket_id'] = str(response_data['ticket_id'])
+            return response_data
         else:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -79,7 +83,11 @@ async def get_all_complaints(current_user: dict) -> List[Complaint]:
     try:
         response = supabase.table('complaints').select("*").order('created_at', desc=True).execute()
         if response.data:
-            complaints = [Complaint(**item) for item in response.data]
+            complaints = []
+            for item in response.data:
+                if item.get('ticket_id') is not None:
+                    item['ticket_id'] = str(item['ticket_id'])
+                complaints.append(Complaint(**item))
             return complaints
         return []
     except Exception as e:
@@ -109,7 +117,13 @@ async def get_user_complaints(current_user: dict) -> List[Complaint]:
             .execute()
 
         if response.data:
-            return [Complaint(**item) for item in response.data]
+            complaints = []
+            for item in response.data:
+                # Convert ticket_id to string if it's not None
+                if item.get('ticket_id') is not None:
+                    item['ticket_id'] = str(item['ticket_id'])
+                complaints.append(Complaint(**item))
+            return complaints
         return []
 
     except Exception as e:
@@ -145,7 +159,12 @@ async def get_complaint_by_id(complaint_id: int, current_user: dict) -> Complain
                 detail="Complaint not found or access denied."
             )
 
-        return Complaint(**response.data)
+        # Convert ticket_id to string if it's not None
+        complaint_data = response.data
+        if complaint_data.get('ticket_id') is not None:
+            complaint_data['ticket_id'] = str(complaint_data['ticket_id'])
+
+        return Complaint(**complaint_data)
 
     except Exception as e:
         print(f"Error fetching complaint: {e}")
