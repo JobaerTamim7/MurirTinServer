@@ -1,13 +1,22 @@
 from pydantic import BaseModel
 from typing import List
 
-class NearestBusStopResponse(BaseModel):
+class BusStopPathResponse(BaseModel):
     name: str
     latitude: float
     longitude: float
     distance: float  
     duration: float
     coordinates: List[List[float]]  
+
+class NearestBusStopResponse(BusStopPathResponse):
+    pass
+
+class BusStopPathRequest(BaseModel):
+    user_longitude: float
+    user_latitude:float
+    longitude: float
+    latitude: float
 
 class NearestBusStopRequest(BaseModel):
     longitude: float

@@ -4,7 +4,7 @@ from models.bus_stop import BusStopResponse
 from database import supabase
 from postgrest.base_request_builder import APIResponse
 import httpx
-from models.nearest_bus_stop import NearestBusStopResponse
+from models.nearest_bus_stop import NearestBusStopResponse,BusStopPathResponse
 from geopy.distance import geodesic
 from fastapi import status
 
@@ -67,6 +67,47 @@ def get_all_routes(current_user: dict):
             status_code=500,
             detail=f"An error occurred while fetching routes: {str(e)}"
         )
+    
+async def get_bus_path(user_longitude: float, user_latitude: float, bus_stop_longitude: float, bus_stop_latitude: float, current_user:dict) -> BusStopPathResponse:
+    user_id = current_user.get("sub")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required to view companies."
+        )
+    print(f"User ID: {user_id}, User Location: ({user_longitude}, {user_latitude}), Bus Stop Location: ({bus_stop_longitude}, {bus_stop_latitude})")
+    try:
+        url : str = f"https://api.mapbox.com/directions/v5/mapbox/walking/{user_longitude},{user_latitude};{bus_stop_longitude},{bus_stop_latitude}?alternatives=false&continue_straight=true&geometries=geojson&overview=full&steps=false&access_token=pk.eyJ1IjoidGFtaW03IiwiYSI6ImNtYzByY243djA2Y2UybHIydTllaHhudjIifQ.6zTjpL0hMo0oQWBt8KNHOQ"
+
+        data = dict()
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url=url)
+            if response.status_code != 200:
+                raise HTTPException(
+                    status_code=response.status_code,
+                    detail="Failed to fetch directions."
+                )
+            data = response.json()
+
+        coordinates = data["routes"][0]["geometry"]["coordinates"]
+
+        bus_stop_path_response = BusStopPathResponse(
+            name="Bus Stop",
+            latitude=bus_stop_latitude,
+            longitude=bus_stop_longitude,
+            distance=data["routes"][0]["distance"],
+            duration=data["routes"][0]["duration"],
+            coordinates=coordinates
+        )
+
+        return bus_stop_path_response
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"An error occurred while fetching the nearest bus stop: {str(e)}"
+        )
+
+    
     
 async def get_nearest_bus_stop(longitude: float, latitude: float, route_id: str, current_user: dict) -> NearestBusStopResponse:
     user_id = current_user.get("sub")
