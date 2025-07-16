@@ -37,7 +37,7 @@ async def get_ticket_data(ticket_id: int, current_user: dict) -> TicketData:
             pass 
 
         if owner_id != user_id_from_token:
-            print(f"DEBUG: Mismatch! Token user_id: {user_id_from_token}, Ticket owner_id: {owner_id}") # Add this for specific debug
+            print(f"DEBUG: Mismatch! Token user_id: {user_id_from_token}, Ticket owner_id: {owner_id}") 
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have permission to access this resource."
